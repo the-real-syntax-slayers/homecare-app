@@ -1,0 +1,14 @@
+# Build artifacts
+api/bin/
+api/obj/
+
+# Logs
+api/APILogs/
+
+# SQLite DB files
+*.db
+*.db-shm
+*.db-wal
+
+# VSCode
+.vscode/
