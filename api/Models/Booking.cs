@@ -7,24 +7,24 @@ namespace HealthApp.Models
     {
         public int BookingId { get; set; }
 
+        // Her kan dere skrive konkrete tasks: "Handle", "Medisin", osv.
         [StringLength(200)]
         public string? Description { get; set; }
 
         [DataType(DataType.DateTime)]
         public DateTime Date { get; set; }
 
+        // Kobling til AvailableDay (entitet 1)
+        [Required]
+        public int AvailableDayId { get; set; }
+        public virtual AvailableDay AvailableDay { get; set; } = default!;
+
         [Required]
         public int PatientId { get; set; }
-
-        // navigation property
         public virtual Patient Patient { get; set; } = default!;
 
         [Required]
         public int EmployeeId { get; set; }
-
-        // navigation property
         public virtual Employee Employee { get; set; } = default!;
-
     }
-
 }
