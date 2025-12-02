@@ -1,247 +1,186 @@
-using HealthApp.Models;
-using HealthApp.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using HealthApp.DTOs;
 using HealthApp.DAL;
+using HealthApp.DTOs;
+using HealthApp.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace HealthApp.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class BookingAPIController : ControllerBase
+namespace HealthApp.Controllers
 {
-    private readonly IBookingRepository _bookingRepository;
-    private readonly ILogger<BookingAPIController> _logger;
-
-    public BookingAPIController(IBookingRepository bookingRepository, ILogger<BookingAPIController> logger)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BookingsController : ControllerBase
     {
-        _bookingRepository = bookingRepository;
-        _logger = logger;
-    }
-    [HttpGet("bookinglist")]
-    public async Task<IActionResult> BookingList()
-    {
-        var bookings = await _bookingRepository.GetAll();
-        if (bookings == null)
-        {
-            _logger.LogError("[BookingAPIController] Booking list not found while executing _bookingRepository.GetAll()");
-            return NotFound("Booking list not found");
-        }
-        var bookingDtos = bookings.Select(booking => new BookingDto
-        {
-            BookingId = booking.BookingId,
-            Description = booking.Description,
-            Date = booking.Date,
-            PatientId = booking.PatientId,
-            EmployeeId = booking.EmployeeId
-        });
-        return Ok(bookingDtos);
-    }
-    [Authorize]
-    [HttpPost("create")]
-    public async Task<IActionResult> Create([FromBody] BookingDto bookingDto)
-    {
-        if (bookingDto == null)
-        {
-            return BadRequest("Booking cannot be null");
-        }
-        var newBooking = new Booking
-        {
-            Description = bookingDto.Description,
-            Date = bookingDto.Date,
-            PatientId = bookingDto.PatientId,
-            EmployeeId = bookingDto.EmployeeId
-        };
-        bool returnOk = await _bookingRepository.Create(newBooking);
-        if (returnOk)
-            return CreatedAtAction(nameof(BookingList), new { id = newBooking.BookingId }, newBooking);
+        private readonly IBookingRepository _bookingRepository;
+        private readonly ILogger<BookingsController> _logger;
 
-        _logger.LogWarning("[BookingAPIController] Booking creation failed {@booking}", newBooking);
-        return StatusCode(500, "Internal server error");
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetBooking(int id)
-    {
-        var booking = await _bookingRepository.GetBookingById(id);
-        if (booking == null)
+        public BookingsController(
+            IBookingRepository bookingRepository,
+            ILogger<BookingsController> logger)
         {
-            _logger.LogError("[BookingAPIController] Booking not found for the BookingId {BookingId:0000}", id);
-            return NotFound("Booking not found for the BookingId");
-        }
-        return Ok(booking);
-    }
-    [Authorize]
-    [HttpPut("update/{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] BookingDto bookingDto)
-    {
-        if (bookingDto == null)
-        {
-            return BadRequest("Booking data cannot be null");
-        }
-        // Find the booking in the database
-        var existingBooking = await _bookingRepository.GetBookingById(id);
-        if (existingBooking == null)
-        {
-            return NotFound("Booking not found");
-        }
-        // Update the booking properties
-        existingBooking.Description = bookingDto.Description;
-        existingBooking.Date = bookingDto.Date;
-        existingBooking.PatientId = bookingDto.PatientId;
-        existingBooking.EmployeeId = bookingDto.EmployeeId;
-        // Save the changes
-        bool updateSuccessful = await _bookingRepository.Update(existingBooking);
-        if (updateSuccessful)
-        {
-            return Ok(existingBooking); // Return the updated booking
+            _bookingRepository = bookingRepository;
+            _logger = logger;
         }
 
-        _logger.LogWarning("[BookingAPIController] Booking update failed {@booking}", existingBooking);
-        return StatusCode(500, "Internal server error");
-    }
-    [Authorize]
-    [HttpDelete("delete/{id}")]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        bool returnOk = await _bookingRepository.Delete(id);
-        if (!returnOk)
+        // GET: api/bookings
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            _logger.LogError("[BookingAPIController] Booking deletion failed for the BookingId {BookingId:0000}", id);
-            return BadRequest("Booking deletion failed");
-        }
-        return NoContent(); // 200 Ok is commonly used when the server returns a response body with additional information about the result of the request. For a DELETE operation, there's generally no need to return additional data, making 204 NoContent a better fit.
-    }
+            var bookings = await _bookingRepository.GetAll();
 
-}
-public class BookingController : Controller
-{
+            if (bookings == null)
+            {
+                _logger.LogError("[BookingsController] Booking list not found in GetAll()");
+                return NotFound("Booking list not found");
+            }
 
-    private readonly IBookingRepository _bookingRepository;
-    private readonly ILogger<BookingController> _logger;
+            var dtos = bookings.Select(b => new BookingDto
+            {
+                BookingId = b.BookingId,
+                Description = b.Description,
+                Date = b.Date,
+                PatientId = b.PatientId,
+                EmployeeId = b.EmployeeId,
+                AvailableDayId = b.AvailableDayId
+            });
 
-    public BookingController(IBookingRepository bookingRepository,
-    ILogger<BookingController> logger)
-    {
-        _bookingRepository = bookingRepository;
-        _logger = logger;
-    }
-
-    public async Task<IActionResult> Calendar(int? year, int? month)
-    {
-        _logger.LogInformation("This is an information messeage");
-        _logger.LogWarning("This is a warning message");
-        _logger.LogError("This is an error message");
-        DateTime targetDate;
-        //Checking if there is a specific date written in the URL.
-        if (year.HasValue && month.HasValue)
-        {
-            targetDate = new DateTime(year.Value, month.Value, 1);
-        }
-        else
-        {
-            targetDate = DateTime.Today;
+            return Ok(dtos);
         }
 
-        // Pass the 1st day of that month to the View.
-        // The View will use this for its calendar grid logic.
-        DateTime firstDayOfTargetMonth = new DateTime(targetDate.Year, targetDate.Month, 1);
-        ViewBag.CalendarDate = firstDayOfTargetMonth;
-        ViewBag.CurrentViewName = "Calendar"; // You were doing this via the ViewModel, but we can do it here
-
-
-        // Instead of getting ALL bookings, we get only the ones for the target month.
-        var filteredBookings = await _bookingRepository.GetBookingsByMonthAsync(targetDate.Year, targetDate.Month);
-
-        if (filteredBookings == null)
+        // GET: api/bookings/5
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            _logger.LogError("[BookingController] Booking list not found while executin _bookingRepository.GetAll()");
-            return NotFound("Booking list not found");
+            var booking = await _bookingRepository.GetBookingById(id);
+
+            if (booking == null)
+            {
+                _logger.LogError("[BookingsController] Booking not found for id {BookingId}", id);
+                return NotFound("Booking not found");
+            }
+
+            var dto = new BookingDto
+            {
+                BookingId = booking.BookingId,
+                Description = booking.Description,
+                Date = booking.Date,
+                PatientId = booking.PatientId,
+                EmployeeId = booking.EmployeeId,
+                AvailableDayId = booking.AvailableDayId
+            };
+
+            return Ok(dto);
         }
-        // Create the ViewModel using the filtered list of bookings
-        var bookingsViewModel = new BookingsViewModel(filteredBookings, "Calendar");
 
-        return View(bookingsViewModel);
-    }
-
-    [HttpGet]
-    [Authorize]
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Create(Booking booking)
-    {
-
-        if (ModelState.IsValid)
+        // Optional: filter by year/month
+        // GET: api/bookings/by-month?year=2025&month=10
+        [HttpGet("by-month")]
+        public async Task<IActionResult> GetByMonth([FromQuery] int year, [FromQuery] int month)
         {
-            bool returnOk = await _bookingRepository.Create(booking);
-            if (returnOk)
-                return RedirectToAction(nameof(Calendar));
+            var bookings = await _bookingRepository.GetBookingsByMonthAsync(year, month);
 
+            var dtos = bookings.Select(b => new BookingDto
+            {
+                BookingId = b.BookingId,
+                Description = b.Description,
+                Date = b.Date,
+                PatientId = b.PatientId,
+                EmployeeId = b.EmployeeId,
+                AvailableDayId = b.AvailableDayId
+            });
+
+            return Ok(dtos);
         }
-        _logger.LogWarning("[BookingController] Booking creation failed {@booking}", booking);
-        return View(booking);
-    }
 
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> Update(int id)
-    {
-        var booking = await _bookingRepository.GetBookingById(id);
-        if (booking == null)
+        // POST: api/bookings
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] BookingDto dto)
         {
-            _logger.LogError("[BookingController] Booking not found when updating the BookingId {BookingId:0000}",
-            id);
-            return BadRequest("Booking not found for the BookingId");
-        }
-        return View(booking);
-    }
+            if (dto == null)
+            {
+                return BadRequest("Booking cannot be null");
+            }
 
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Update(Booking booking)
-    {
-        if (ModelState.IsValid)
-        {
-            bool returnOk = await _bookingRepository.Update(booking);
-            if (returnOk)
-                return RedirectToAction(nameof(Calendar));
-        }
-        _logger.LogWarning("[BookingController] Booking update failed {@booking}", booking);
-        return View(booking);
-    }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var booking = await _bookingRepository.GetBookingById(id);
-        if (booking == null)
-        {
-            _logger.LogError("[BookingController] Booking not found for the BookingId {BookingId:0000}",
-            id);
-            return BadRequest("Booking not found for the BookingId");
-        }
-        return View(booking);
-    }
+            var booking = new Booking
+            {
+                Description = dto.Description,
+                Date = dto.Date,
+                PatientId = dto.PatientId,
+                EmployeeId = dto.EmployeeId,
+                AvailableDayId = dto.AvailableDayId
+            };
 
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        bool returnOk = await _bookingRepository.Delete(id);
-        if (!returnOk)
-        {
-            _logger.LogError("[BookingController] Booking deletion failed for the BookingId {BookingId:0000}",
-            id);
-            return BadRequest("Booking deletion failed");
+            var created = await _bookingRepository.Create(booking);
+
+            if (!created)
+            {
+                _logger.LogWarning("[BookingsController] Booking creation failed {@booking}", booking);
+                return StatusCode(500, "Internal server error while creating booking");
+            }
+
+            dto.BookingId = booking.BookingId;
+
+            return CreatedAtAction(nameof(GetById), new { id = booking.BookingId }, dto);
         }
-        return RedirectToAction(nameof(Calendar));
+
+        // PUT: api/bookings/5
+        [Authorize]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] BookingDto dto)
+        {
+            if (dto == null)
+            {
+                return BadRequest("Booking data cannot be null");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existing = await _bookingRepository.GetBookingById(id);
+
+            if (existing == null)
+            {
+                return NotFound("Booking not found");
+            }
+
+            existing.Description = dto.Description;
+            existing.Date = dto.Date;
+            existing.PatientId = dto.PatientId;
+            existing.EmployeeId = dto.EmployeeId;
+            existing.AvailableDayId = dto.AvailableDayId;
+
+            var updated = await _bookingRepository.Update(existing);
+
+            if (!updated)
+            {
+                _logger.LogWarning("[BookingsController] Booking update failed {@booking}", existing);
+                return StatusCode(500, "Internal server error while updating booking");
+            }
+
+            return Ok(dto);
+        }
+
+        // DELETE: api/bookings/5
+        [Authorize]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var deleted = await _bookingRepository.Delete(id);
+
+            if (!deleted)
+            {
+                _logger.LogError("[BookingsController] Booking deletion failed for id {BookingId}", id);
+                return BadRequest("Booking deletion failed");
+            }
+
+            return NoContent();
+        }
     }
 }

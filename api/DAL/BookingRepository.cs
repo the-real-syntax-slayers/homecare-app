@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealthApp.DAL
 {
-
     public class BookingRepository : IBookingRepository
     {
         private readonly BookingDbContext _db;
@@ -23,11 +22,9 @@ namespace HealthApp.DAL
             }
             catch (Exception e)
             {
-                _logger.LogError("[BookingRepository] bookings ToListAsync() failed when GetAll(), error message: {e}",
-                e.Message);
+                _logger.LogError("[BookingRepository] GetAll failed: {Error}", e.Message);
                 return null;
             }
-
         }
 
         public async Task<Booking?> GetBookingById(int id)
@@ -38,14 +35,11 @@ namespace HealthApp.DAL
             }
             catch (Exception e)
             {
-                _logger.LogError("[BookingRepository] booking FindAsync(id) failed when GetBookingById, for BookingId {BookingId:0000}, error message: {e}",
-                id, e.Message);
+                _logger.LogError("[BookingRepository] GetBookingById({Id}) failed: {Error}", id, e.Message);
                 return null;
             }
-
         }
 
-        // This is for filtering on the database
         public async Task<IEnumerable<Booking>> GetBookingsByMonthAsync(int year, int month)
         {
             return await _db.Bookings
@@ -57,17 +51,15 @@ namespace HealthApp.DAL
         {
             try
             {
-                _db.Bookings.Add(booking);
+                await _db.Bookings.AddAsync(booking);
                 await _db.SaveChangesAsync();
                 return true;
             }
             catch (Exception e)
             {
-                _logger.LogError("[BookingRepository] booking creation failed for booking {@booking}, error message: {e}",
-                booking, e.Message);
+                _logger.LogError("[BookingRepository] Create failed: {Error}", e.Message);
                 return false;
             }
-
         }
 
         public async Task<bool> Update(Booking booking)
@@ -80,11 +72,9 @@ namespace HealthApp.DAL
             }
             catch (Exception e)
             {
-                _logger.LogError("[BookingRepository] booking FindAsync(id) failed when updating the BookingId {BookingId:0000}, error message: {e}",
-                booking, e.Message);
+                _logger.LogError("[BookingRepository] Update({Id}) failed: {Error}", booking.BookingId, e.Message);
                 return false;
             }
-
         }
 
         public async Task<bool> Delete(int id)
@@ -94,8 +84,7 @@ namespace HealthApp.DAL
                 var booking = await _db.Bookings.FindAsync(id);
                 if (booking == null)
                 {
-                    _logger.LogError("[BookingRepository] booking  not found for BookingId {BookingId:0000}",
-                     id);
+                    _logger.LogWarning("[BookingRepository] Delete({Id}) failed: not found", id);
                     return false;
                 }
 
@@ -105,12 +94,9 @@ namespace HealthApp.DAL
             }
             catch (Exception e)
             {
-                _logger.LogError("[BookingRepository] booking deletion failed found for BookingId {BookingId:0000}, error message: {e}",
-                id, e.Message);
+                _logger.LogError("[BookingRepository] Delete({Id}) failed: {Error}", id, e.Message);
                 return false;
             }
-
-
         }
     }
 }

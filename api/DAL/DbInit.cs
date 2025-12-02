@@ -9,7 +9,8 @@ public static class DBInit
     {
         using var serviceScope = app.ApplicationServices.CreateScope();
         BookingDbContext context = serviceScope.ServiceProvider.GetRequiredService<BookingDbContext>();
-        // instead of EnsureDeleted/EnsureCreated, apply migrations:
+
+        // Apply migrations (safe)
         try
         {
             context.Database.Migrate();
@@ -19,31 +20,62 @@ public static class DBInit
             context.Database.EnsureCreated();
         }
 
-        //context.Database.EnsureDeleted();
-        //context.Database.EnsureCreated();
-
-
-
+        // -----------------------------
+        // EMPLOYEES
+        // -----------------------------
         if (!context.Employees.Any())
         {
             var employees = new List<Employee>
             {
-                new Employee { Name = "Ansatt"},
+                new Employee { Name = "Ansatt", Description = "Standard employee" }
             };
+
             context.AddRange(employees);
             context.SaveChanges();
         }
 
+        // -----------------------------
+        // PATIENTS
+        // -----------------------------
         if (!context.Patients.Any())
         {
             var patients = new List<Patient>
             {
-                new Patient { Name = "Pasient"},
+                new Patient { Name = "Pasient", Description = "Standard patient" }
             };
+
             context.AddRange(patients);
             context.SaveChanges();
         }
 
+        // -----------------------------
+        // AVAILABLE DAYS
+        // -----------------------------
+        if (!context.AvailableDays.Any())
+        {
+            var availableDays = new List<AvailableDay>
+            {
+                new AvailableDay
+                {
+                    Date = DateTime.Parse("2025-10-10"),
+                    EmployeeId = 1,
+                    Notes = "Formiddag"
+                },
+                new AvailableDay
+                {
+                    Date = DateTime.Parse("2025-10-11"),
+                    EmployeeId = 1,
+                    Notes = "Ettermiddag"
+                }
+            };
+
+            context.AddRange(availableDays);
+            context.SaveChanges();
+        }
+
+        // -----------------------------
+        // BOOKINGS
+        // -----------------------------
         if (!context.Bookings.Any())
         {
             var bookings = new List<Booking>
@@ -53,18 +85,19 @@ public static class DBInit
                     Description = "Vondt i hamstringen",
                     Date = DateTime.Parse("2025-10-10T15:01:00"),
                     PatientId = 1,
-                    EmployeeId = 1
-
+                    EmployeeId = 1,
+                    AvailableDayId = 1
                 },
                 new Booking
                 {
                     Description = "Vondt i quaden",
-                    Date = DateTime.Parse("2025-10-10T15:01:00"),
+                    Date = DateTime.Parse("2025-10-10T16:00:00"),
                     PatientId = 1,
-                    EmployeeId = 1
-
+                    EmployeeId = 1,
+                    AvailableDayId = 1
                 }
             };
+
             context.AddRange(bookings);
             context.SaveChanges();
         }
