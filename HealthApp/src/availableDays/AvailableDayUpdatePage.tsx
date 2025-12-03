@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AvailableDayForm from './AvailableDayForm';
-import { AvailableDay } from '../types/AvailableDay';
+import { AvailableDay } from '../types/availableDay';
 import * as AvailableDayService from './AvailableDayService';
 
 const AvailableDayUpdatePage: React.FC = () => {
