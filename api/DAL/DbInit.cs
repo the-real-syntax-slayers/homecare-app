@@ -1,105 +1,75 @@
-using Microsoft.EntityFrameworkCore;
 using HealthApp.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace HealthApp.DAL;
-
-public static class DBInit
+namespace HealthApp.DAL
 {
-    public static void Seed(IApplicationBuilder app)
+    public static class DBInit
     {
-        using var serviceScope = app.ApplicationServices.CreateScope();
-        BookingDbContext context = serviceScope.ServiceProvider.GetRequiredService<BookingDbContext>();
-
-        // Apply migrations (safe)
-        try
+        public static void Seed(IApplicationBuilder app)
         {
+            using var scope = app.ApplicationServices.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<BookingDbContext>();
+
+            // Sikrer at migrasjoner er kjørt
             context.Database.Migrate();
-        }
-        catch
-        {
-            context.Database.EnsureCreated();
-        }
 
-        // -----------------------------
-        // EMPLOYEES
-        // -----------------------------
-        if (!context.Employees.Any())
-        {
-            var employees = new List<Employee>
+            // Hvis vi allerede har data, gjør ingenting
+            if (context.Employees.Any() || context.Patients.Any() || context.AvailableDays.Any())
             {
-                new Employee { Name = "Ansatt", Description = "Standard employee" }
+                return;
+            }
+
+            // --------- Employees ---------
+            var employee1 = new Employee
+            {
+                Name = "Anna",
+                Description = "Andersen"
             };
 
-            context.AddRange(employees);
-            context.SaveChanges();
-        }
-
-        // -----------------------------
-        // PATIENTS
-        // -----------------------------
-        if (!context.Patients.Any())
-        {
-            var patients = new List<Patient>
+            var employee2 = new Employee
             {
-                new Patient { Name = "Pasient", Description = "Standard patient" }
+                Name = "Gushi",
+                Description = "Andersen"
             };
 
-            context.AddRange(patients);
+            context.Employees.AddRange(employee1, employee2);
             context.SaveChanges();
-        }
 
-        // -----------------------------
-        // AVAILABLE DAYS
-        // -----------------------------
-        if (!context.AvailableDays.Any())
-        {
-            var availableDays = new List<AvailableDay>
+            // --------- Patients ---------
+            var patient1 = new Patient
             {
-                new AvailableDay
-                {
-                    Date = DateTime.Parse("2025-10-10"),
-                    EmployeeId = 1,
-                    Notes = "Formiddag"
-                },
-                new AvailableDay
-                {
-                    Date = DateTime.Parse("2025-10-11"),
-                    EmployeeId = 1,
-                    Notes = "Ettermiddag"
-                }
+                Name = "klient",
+                Description = "Andersen"
             };
 
-            context.AddRange(availableDays);
-            context.SaveChanges();
-        }
-
-        // -----------------------------
-        // BOOKINGS
-        // -----------------------------
-        if (!context.Bookings.Any())
-        {
-            var bookings = new List<Booking>
+            var patient2 = new Patient
             {
-                new Booking
-                {
-                    Description = "Vondt i hamstringen",
-                    Date = DateTime.Parse("2025-10-10T15:01:00"),
-                    PatientId = 1,
-                    EmployeeId = 1,
-                    AvailableDayId = 1
-                },
-                new Booking
-                {
-                    Description = "Vondt i quaden",
-                    Date = DateTime.Parse("2025-10-10T16:00:00"),
-                    PatientId = 1,
-                    EmployeeId = 1,
-                    AvailableDayId = 1
-                }
+                Name = "klient2",
+                Description = "Andersen"
             };
 
-            context.AddRange(bookings);
+            context.Patients.AddRange(patient1, patient2);
             context.SaveChanges();
+
+            // --------- AvailableDays ---------
+            var day1 = new AvailableDay
+            {
+                Date = new DateTime(2025, 10, 10),
+                EmployeeId = employee1.EmployeeId,
+                Notes = "Formiddag"
+            };
+
+            var day2 = new AvailableDay
+            {
+                Date = new DateTime(2025, 10, 11),
+                EmployeeId = employee1.EmployeeId,
+                Notes = "Ettermiddag"
+            };
+
+            context.AvailableDays.AddRange(day1, day2);
+            context.SaveChanges();
+
+            // Ingen Bookings seedes her – de opprettes via frontend
         }
     }
 }

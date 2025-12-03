@@ -1,88 +1,129 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import { Booking } from '../types/booking';
-
+import { AvailableDay } from '../types/availableDay';
+import * as AvailableDayService from './AvailableDayService';
+import * as BookingService from './BookingService';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 interface BookingFormProps {
-    onBookingChanged: (newBooking: Booking) => void;
-    bookingId?: number;
-    isUpdate?: boolean;
     initialData?: Booking;
+    onSubmit: (booking: Booking) => Promise<void>;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ onBookingChanged, bookingId, isUpdate = false, initialData }) => {
-    const [description, setDescription] = useState<string>(initialData?.description || '');
-    const [date, setDate] = useState<string>(initialData?.date || '');
-    const [patientId, setPatientId] = useState<number>(1);
-    const [employeeId, setEmployeeId] = useState<number>(1);
-    const [error, setError] = useState<string | null>(null);
+const BookingForm: React.FC<BookingFormProps> = ({ initialData, onSubmit }) => {
+    const [description, setDescription] = useState(initialData?.description || '');
+    const [availableDayId, setAvailableDayId] = useState<number | ''>('');
+    const [availableDays, setAvailableDays] = useState<AvailableDay[]>([]);
+    const { user } = useAuth();
     const navigate = useNavigate();
 
-    const onCancel = () => {
-        navigate(-1); // This will navigate back one step in the history
-    };
+    // Hent available days + bookings, og filtrer bort allerede bookede dager
+    useEffect(() => {
+        const loadData = async () => {
+            const [days, bookings] = await Promise.all([
+                AvailableDayService.fetchAvailableDays(),
+                BookingService.fetchBookings()
+            ]);
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-        const booking: Booking = { bookingId, description, date, patientId, employeeId };
-        onBookingChanged(booking); // Call the passed function with the booking data
+            const currentDayId = initialData?.availableDayId;
+
+            const bookedIds = new Set(
+                bookings
+                    .filter(b => b.availableDayId !== undefined && b.availableDayId !== null)
+                    .map(b => b.availableDayId!)
+            );
+
+            const freeDays = days.filter(d =>
+                d.availableDayId !== undefined &&
+                (
+                    !bookedIds.has(d.availableDayId) ||          // ikke booket
+                    d.availableDayId === currentDayId            // eller den dagen vi allerede har i en eksisterende booking
+                )
+            );
+
+            setAvailableDays(freeDays);
+        };
+
+        loadData();
+    }, [initialData]);
+
+    // når vi er i edit-modus og har initialData: sett valgt dag
+    useEffect(() => {
+        if (initialData && initialData.availableDayId && availableDays.length > 0) {
+            setAvailableDayId(initialData.availableDayId);
+        }
+    }, [initialData, availableDays]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user) {
+            alert('You must be logged in');
+            return;
+        }
+
+        if (!availableDayId) {
+            alert('Please choose an available day');
+            return;
+        }
+
+        const selected = availableDays.find(d => d.availableDayId === availableDayId);
+        if (!selected) {
+            alert('Selected day not found');
+            return;
+        }
+
+        if (user.role === 'Patient' && !user.patientId) {
+            alert('Could not determine patient id from username.');
+            return;
+        }
+
+        const booking: Booking = {
+            bookingId: initialData?.bookingId,
+            description,
+            availableDayId: selected.availableDayId!,
+            employeeId: selected.employeeId,
+            date: new Date(selected.date).toISOString(),
+            // Pasient får sin egen id, admin/emp kan fortsatt bruke 1 som demo
+            patientId: user.patientId ?? 1
+        };
+
+        await onSubmit(booking);
+        navigate('/bookings');
     };
 
     return (
         <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formBookingDescription">
+            <Form.Group controlId="description" className="mb-3">
                 <Form.Label>Description</Form.Label>
                 <Form.Control
-                    as="textarea"
-                    rows={3}
-                    placeholder="Enter booking description"
+                    type="text"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     required
-                    pattern="[0-9a-zA-ZæøåÆØÅ. \-]{10,250}" // Regular expression pattern
-                    title="The Description must be numbers or letters and between 10 to 250 characters."
-                />
-            </Form.Group>
-            <Form.Group controlId="formBookingDate" className="mb-3">
-                <Form.Label>Date</Form.Label>
-                <Form.Control
-                    type="datetime-local"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
                 />
             </Form.Group>
 
-            <Form.Group controlId="formPatientId" className="mb-3">
-                <Form.Label>Patient Id</Form.Label>
-                <Form.Control
-                    type="number"
-                    placeholder="Enter patient id"
-                    value={patientId}
-                    onChange={(e) => setPatientId(Number(e.target.value))}
+            <Form.Group controlId="availableDay" className="mb-3">
+                <Form.Label>Select available day</Form.Label>
+                <Form.Select
+                    value={availableDayId}
+                    onChange={(e) => setAvailableDayId(Number(e.target.value))}
                     required
-                    min="1"
-                    step="1"
-                />
+                >
+                    <option value="">Choose a day...</option>
+                    {availableDays.map(day => (
+                        <option key={day.availableDayId} value={day.availableDayId}>
+                            {new Date(day.date).toLocaleString()} — Employee #{day.employeeId}
+                        </option>
+                    ))}
+                </Form.Select>
             </Form.Group>
 
-            <Form.Group controlId="formEmployeeId" className="mb-3">
-                <Form.Label>Employee Id</Form.Label>
-                <Form.Control
-                    type="number"
-                    placeholder="Enter employee id"
-                    value={employeeId}
-                    onChange={(e) => setEmployeeId(Number(e.target.value))}
-                    required
-                    min="1"
-                    step="1"
-                />
-            </Form.Group>
-
-            {/* {error && <p style={{ color: 'red' }}>{error}</p>} */}
-
-            <Button variant="primary" type="submit">Create Booking</Button>
-            <Button variant="secondary" onClick={onCancel} className="ms-2">Cancel</Button>
+            <Button type="submit" className="btn btn-success">
+                Save Booking
+            </Button>
         </Form>
     );
 };

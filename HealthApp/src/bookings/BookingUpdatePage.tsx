@@ -1,51 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import BookingForm from './BookingForm';
 import { Booking } from '../types/booking';
 import * as BookingService from './BookingService';
 
 const BookingUpdatePage: React.FC = () => {
-    const { bookingId } = useParams<{ bookingId: string }>(); // Get bookingId from the URL
-    const navigate = useNavigate(); // Create a navigate function
+    const { bookingId } = useParams<{ bookingId: string }>();
     const [booking, setBooking] = useState<Booking | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchBooking = async () => {
+        const load = async () => {
+            if (!bookingId) {
+                setError('No booking id provided');
+                setLoading(false);
+                return;
+            }
+
             try {
-                const data = await BookingService.fetchBookingById(bookingId!);
+                const data = await BookingService.fetchBookingById(Number(bookingId));
                 setBooking(data);
-            } catch (error) {
-                setError('Failed to fetch booking');
-                console.error('There was a problem with the fetch operation:', error);
+            } catch (err) {
+                console.error('Error loading booking', err);
+                setError('Failed to load booking.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchBooking();
+        load();
     }, [bookingId]);
 
-    const handleBookingUpdated = async (booking: Booking) => {
-
-        try {
-            const data = await BookingService.updateBooking(Number(bookingId), booking);
-            console.log('Booking updated successfully:', data);
-            navigate('/bookings'); // Navigate back after successful creation
-        } catch (error) {
-            console.error('There was a problem with the fetch operation:', error);
-        }
-    }
+    const handleUpdate = async (updated: Booking) => {
+        if (!bookingId) return;
+        await BookingService.updateBooking(Number(bookingId), updated);
+    };
 
     if (loading) return <p>Loading...</p>;
-    if (error) return <p>{error}</p>;
-    if (!booking) return <p>No booking found</p>;
+    if (error) return <p style={{ color: 'red' }}>{error}</p>;
+    if (!booking) return <p>Booking not found.</p>;
 
     return (
         <div>
-            <h2>Update Booking</h2>
-            <BookingForm onBookingChanged={handleBookingUpdated} bookingId={booking.bookingId} isUpdate={true} initialData={booking} />
+            <h1>Update booking</h1>
+            <BookingForm initialData={booking} onSubmit={handleUpdate} />
         </div>
     );
 };

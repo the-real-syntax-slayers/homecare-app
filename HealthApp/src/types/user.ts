@@ -8,4 +8,11 @@ export interface User {
     exp: number;    // When JWT will expire
     iss: string;    // Identifies issuer
     aud: string;    // Identifies reciever of JWT
+
+    // Simple frontend role support
+    role: 'Admin' | 'Employee' | 'Patient';
+
+    // Kobling til våre domene-modeller
+    employeeId?: number;
+    patientId?: number;
 }

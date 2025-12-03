@@ -1,7 +1,9 @@
+// src/bookings/BookingService.tsx
+import { Booking } from '../types/booking';
+
 const API_URL = import.meta.env.VITE_API_URL;
 
-const getAuthHeaders = () => {
-    // Read JWT token from localStorage using the standard getItem API
+const getAuthHeaders = (): HeadersInit => {
     const token = localStorage.getItem('token');
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -13,48 +15,52 @@ const getAuthHeaders = () => {
 };
 
 const handleResponse = async (response: Response) => {
-    if (response.ok) {  // HTTP status code success 200-299
-        if (response.status === 204) { // Detele returns 204 No content
+    if (response.ok) {
+        if (response.status === 204) {
             return null;
         }
-        return response.json(); // other returns response body as JSON
+        return response.json();
     } else {
         const errorText = await response.text();
         throw new Error(errorText || 'Network response was not ok');
     }
 };
 
-// Get bookinglist
-export const fetchBookings = async () => {
-    const response = await fetch(`${API_URL}/api/bookingapi/bookinglist`);
+// GET: api/bookings
+export const fetchBookings = async (): Promise<Booking[]> => {
+    const response = await fetch(`${API_URL}/api/bookings`);
     return handleResponse(response);
 };
-// Get booking by id
-export const fetchBookingById = async (bookingId: string) => {
-    const response = await fetch(`${API_URL}/api/bookingapi/${bookingId}`);
+
+// GET: api/bookings/{id}
+export const fetchBookingById = async (bookingId: string | number): Promise<Booking> => {
+    const response = await fetch(`${API_URL}/api/bookings/${bookingId}`);
     return handleResponse(response);
 };
-// Post create booking
-export const createBooking = async (booking: any) => {
-    const response = await fetch(`${API_URL}/api/bookingapi/create`, {
+
+// POST: api/bookings
+export const createBooking = async (booking: Booking): Promise<Booking> => {
+    const response = await fetch(`${API_URL}/api/bookings`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(booking),
     });
     return handleResponse(response);
 };
-// Put update booking
-export const updateBooking = async (bookingId: number, booking: any) => {
-    const response = await fetch(`${API_URL}/api/bookingapi/update/${bookingId}`, {
+
+// PUT: api/bookings/{id}
+export const updateBooking = async (bookingId: number, booking: Booking): Promise<Booking> => {
+    const response = await fetch(`${API_URL}/api/bookings/${bookingId}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(booking),
     });
     return handleResponse(response);
 };
-// Delete booking
-export const deleteBooking = async (bookingId: number) => {
-    const response = await fetch(`${API_URL}/api/bookingapi/delete/${bookingId}`, {
+
+// DELETE: api/bookings/{id}
+export const deleteBooking = async (bookingId: number): Promise<null> => {
+    const response = await fetch(`${API_URL}/api/bookings/${bookingId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
     });

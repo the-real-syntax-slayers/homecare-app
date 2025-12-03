@@ -1,3 +1,5 @@
+// src/bookings/BookingTable.tsx
+
 import React from 'react';
 import { Table } from 'react-bootstrap';
 import { Booking } from '../types/booking';
@@ -9,13 +11,13 @@ interface BookingTableProps {
     onBookingDeleted?: (bookingId: number) => void;
 }
 
-const BookingTable: React.FC<BookingTableProps> = ({ bookings, apiUrl, onBookingDeleted }) => {
+const BookingTable: React.FC<BookingTableProps> = ({ bookings, onBookingDeleted }) => {
     return (
         <Table striped bordered hover>
             <thead>
                 <tr>
                     <th>BookingId</th>
-                    <th>Descriptions</th>
+                    <th>Description</th>
                     <th>Date</th>
                     <th>PatientId</th>
                     <th>EmployeeId</th>
@@ -30,14 +32,22 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, apiUrl, onBooking
                         <td>{new Date(booking.date).toLocaleString()}</td>
                         <td>{booking.patientId}</td>
                         <td>{booking.employeeId}</td>
-                        <td className='text-center'>
+                        <td className="text-center">
                             {onBookingDeleted && (
                                 <>
-                                    <Link to={`/bookingupdate/${booking.bookingId}`} className="me-2">Update</Link>
-                                    <Link to="#"
-                                        onClick={(event) => onBookingDeleted(booking.bookingId!)}
-                                        className="btn btn-link text-danger"
-                                    >Delete</Link>
+                                    <Link
+                                        to={`/bookingupdate/${booking.bookingId}`}
+                                        className="me-2"
+                                    >
+                                        Update
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        className="btn btn-link text-danger p-0"
+                                        onClick={() => onBookingDeleted(booking.bookingId!)}
+                                    >
+                                        Delete
+                                    </button>
                                 </>
                             )}
                         </td>
