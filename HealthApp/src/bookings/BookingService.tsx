@@ -34,6 +34,14 @@ export const fetchBookingById = async (bookingId: string) => {
     const response = await fetch(`${API_URL}/api/Bookings/GetById${bookingId}`);
     return handleResponse(response);
 };
+
+// NEW: Get bookings filtered by month
+export const fetchBookingsByMonth = async (year: number, month: number) => {
+    // Note: month must be 1-12 for the backend
+    const response = await fetch(`${API_URL}/api/Bookings/by-month?year=${year}&month=${month}`);
+    return handleResponse(response);
+};
+
 // Post create booking
 export const createBooking = async (booking: any) => {
     const response = await fetch(`${API_URL}/api/Bookings/create`, {

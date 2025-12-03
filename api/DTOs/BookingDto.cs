@@ -19,6 +19,6 @@ namespace HealthApp.DTOs
         public int EmployeeId { get; set; }
 
         [Required]
-        public int AvailableDayId { get; set; }
+        public int? AvailableDayId { get; set; }
     }
 }

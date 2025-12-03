@@ -29,7 +29,7 @@ namespace HealthApp.DAL
                 .HasOne(b => b.AvailableDay)
                 .WithMany(a => a.Bookings)
                 .HasForeignKey(b => b.AvailableDayId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull); // Sett AvailableDayId til null ved sletting av AvailableDay
 
             // Employee → AvailableDay (1–many)
             modelBuilder.Entity<AvailableDay>()

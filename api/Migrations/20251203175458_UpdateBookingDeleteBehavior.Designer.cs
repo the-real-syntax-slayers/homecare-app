@@ -3,6 +3,7 @@ using System;
 using HealthApp.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace api.Migrations
 {
     [DbContext(typeof(BookingDbContext))]
-    partial class BookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203175458_UpdateBookingDeleteBehavior")]
+    partial class UpdateBookingDeleteBehavior
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +53,7 @@ namespace api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AvailableDayId")
+                    b.Property<int>("AvailableDayId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
@@ -131,7 +134,8 @@ namespace api.Migrations
                     b.HasOne("HealthApp.Models.AvailableDay", "AvailableDay")
                         .WithMany("Bookings")
                         .HasForeignKey("AvailableDayId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HealthApp.Models.Employee", "Employee")
                         .WithMany("Bookings")

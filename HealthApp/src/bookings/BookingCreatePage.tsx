@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BookingForm from './BookingForm';
 import { Booking } from '../types/booking';
 import * as BookingService from './BookingService';
+import * as AvailableDayService from '../availableDays/AvailableDayService';
 
 const BookingCreatePage: React.FC = () => {
     const navigate = useNavigate(); // Create a navigate function
@@ -11,6 +12,11 @@ const BookingCreatePage: React.FC = () => {
         try {
             const data = await BookingService.createBooking(booking);
             console.log('Booking created successfully:', data);
+            
+            if (booking.availableDayId) {
+                await AvailableDayService.deleteAvailableDay(booking.availableDayId);
+            }
+            
             navigate('/bookings'); // Navigate back after successful creation
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);

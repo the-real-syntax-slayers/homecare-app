@@ -15,9 +15,9 @@ namespace HealthApp.Models
         public DateTime Date { get; set; }
 
         // Kobling til AvailableDay (entitet 1)
-        [Required]
-        public int AvailableDayId { get; set; }
-        public virtual AvailableDay AvailableDay { get; set; } = default!;
+        //[Required]
+        public int? AvailableDayId { get; set; }
+        public virtual AvailableDay? AvailableDay { get; set; } = default!;
 
         [Required]
         public int PatientId { get; set; }

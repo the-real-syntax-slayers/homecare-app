@@ -9,4 +9,6 @@ export interface User {
     iss: string;    // Identifies issuer
     aud: string;    // Identifies reciever of JWT
     role: 'admin' | 'employee' | 'client'; // User role (e.g., Admin, User)
+
+    userId: number; // Custom claim for user ID
 }

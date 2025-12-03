@@ -77,7 +77,7 @@ const BookingGetAll: React.FC = () => {
         <div>
             <h1>Bookings</h1>
             <Button onClick={fetchBookings} className="btn btn-primary mb-3 me-2" disabled={loading}>
-                {loading ? 'Loading...' : 'Refresh Bookings'}
+                {loading ? 'Loading...' : 'Refresh All Bookings'}
             </Button>
             <Button onClick={toggleCalendarOrTable} className='btn btn-primary mb-3 me-2'>
                 {showTable ? `Display Table` : `Display Calendar`}
