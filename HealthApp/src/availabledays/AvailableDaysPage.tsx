@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 import { AvailableDay } from '../types/availableDay';
-import * as AvailableDayService from './AvailableDayService';
+import * as AvailableDayService from '../availabledays/AvailableDayService';
 import { useAuth } from '../auth/AuthContext';
 
 const AvailableDaysPage: React.FC = () => {
@@ -72,7 +72,7 @@ const AvailableDaysPage: React.FC = () => {
             notes,
         };
 
-        // create/update som før ...
+
 
 
         try {
@@ -96,13 +96,7 @@ const AvailableDaysPage: React.FC = () => {
 
     const handleEdit = (day: AvailableDay) => {
         if (!day.availableDayId) return;
-
         setEditingId(day.availableDayId);
-        // sørg for riktig format til <input type="date">
-        const iso = new Date(day.date).toISOString().substring(0, 10);
-        setDate(iso);
-        setEmployeeId(day.employeeId);
-        setNotes(day.notes ?? '');
     };
 
     const handleDelete = async (id: number) => {

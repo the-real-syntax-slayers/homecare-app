@@ -5,7 +5,7 @@ import BookingListPage from './bookings/BookingListPage'
 import BookingCreatePage from './bookings/BookingCreatePage'
 import BookingUpdatePage from './bookings/BookingUpdatePage'
 import MyBookingsPage from './bookings/MyBookingsPage';
-import AvailableDaysPage from './bookings/AvailableDaysPage';
+import AvailableDaysPage from './availabledays/AvailableDaysPage';
 import NavMenu from './shared/NavMenu'
 import LoginPage from './auth/LoginPage'
 import RegisterPage from './auth/RegisterPage'

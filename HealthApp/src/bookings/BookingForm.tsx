@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import { Booking } from '../types/booking';
 import { AvailableDay } from '../types/availableDay';
-import * as AvailableDayService from './AvailableDayService';
+import * as AvailableDayService from '../availabledays/AvailableDayService';
 import * as BookingService from './BookingService';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -35,6 +35,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ initialData, onSubmit }) => {
                     .map(b => b.availableDayId!)
             );
 
+            // filterer å fjerner booka bookings
             const freeDays = days.filter(d =>
                 d.availableDayId !== undefined &&
                 (
