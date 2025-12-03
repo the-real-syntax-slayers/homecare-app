@@ -22,7 +22,7 @@ namespace HealthApp.Controllers
         }
 
         // GET: api/bookings
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             var bookings = await _bookingRepository.GetAll();
@@ -47,7 +47,7 @@ namespace HealthApp.Controllers
         }
 
         // GET: api/bookings/5
-        [HttpGet("{id:int}")]
+        [HttpGet("GetById{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var booking = await _bookingRepository.GetBookingById(id);
@@ -91,9 +91,9 @@ namespace HealthApp.Controllers
             return Ok(dtos);
         }
 
-        // POST: api/bookings
+        // POST: api/bookings/create
         [Authorize]
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] BookingDto dto)
         {
             if (dto == null)
@@ -128,9 +128,9 @@ namespace HealthApp.Controllers
             return CreatedAtAction(nameof(GetById), new { id = booking.BookingId }, dto);
         }
 
-        // PUT: api/bookings/5
+        // PUT: api/bookings/update/5
         [Authorize]
-        [HttpPut("{id:int}")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] BookingDto dto)
         {
             if (dto == null)
@@ -167,9 +167,9 @@ namespace HealthApp.Controllers
             return Ok(dto);
         }
 
-        // DELETE: api/bookings/5
+        // DELETE: api/bookings/delete/5
         [Authorize]
-        [HttpDelete("{id:int}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _bookingRepository.Delete(id);

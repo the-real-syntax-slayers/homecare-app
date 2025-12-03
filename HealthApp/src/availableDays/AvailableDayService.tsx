@@ -24,37 +24,37 @@ const handleResponse = async (response: Response) => {
     }
 };
 
-// Get bookinglist
-export const fetchBookings = async () => {
-    const response = await fetch(`${API_URL}/api/Bookings/GetAll`);
+// Get availableDaylist
+export const fetchAvailableDays = async () => {
+    const response = await fetch(`${API_URL}/api/AvailableDays/GetAll`);
     return handleResponse(response);
 };
-// Get booking by id
-export const fetchBookingById = async (bookingId: string) => {
-    const response = await fetch(`${API_URL}/api/Bookings/GetById${bookingId}`);
+// Get availableDay by id
+export const fetchAvailableDayById = async (availableDayId: string) => {
+    const response = await fetch(`${API_URL}/api/AvailableDays/GetById${availableDayId}`);
     return handleResponse(response);
 };
-// Post create booking
-export const createBooking = async (booking: any) => {
-    const response = await fetch(`${API_URL}/api/Bookings/create`, {
+// Post create availableDay
+export const createAvailableDay = async (availableDay: any) => {
+    const response = await fetch(`${API_URL}/api/AvailableDays/create`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(booking),
+        body: JSON.stringify(availableDay),
     });
     return handleResponse(response);
 };
-// Put update booking
-export const updateBooking = async (bookingId: number, booking: any) => {
-    const response = await fetch(`${API_URL}/api/Bookings/update/${bookingId}`, {
+// Put update availableDay
+export const updateAvailableDay = async (availableDayId: number, availableDay: any) => {
+    const response = await fetch(`${API_URL}/api/AvailableDays/update/${availableDayId}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify(booking),
+        body: JSON.stringify(availableDay),
     });
     return handleResponse(response);
 };
-// Delete booking
-export const deleteBooking = async (bookingId: number) => {
-    const response = await fetch(`${API_URL}/api/Bookings/delete/${bookingId}`, {
+// Delete availableDay
+export const deleteAvailableDay = async (availableDayId: number) => {
+    const response = await fetch(`${API_URL}/api/AvailableDays/delete/${availableDayId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
     });

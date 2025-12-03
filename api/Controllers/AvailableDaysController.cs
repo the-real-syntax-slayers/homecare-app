@@ -22,7 +22,7 @@ namespace HealthApp.Controllers
         }
 
         // GET: api/availabledays
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             var days = await _availableDayRepository.GetAll();
@@ -45,7 +45,7 @@ namespace HealthApp.Controllers
         }
 
         // GET: api/availabledays/5
-        [HttpGet("{id:int}")]
+        [HttpGet("GetById{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var day = await _availableDayRepository.GetById(id);
@@ -69,7 +69,7 @@ namespace HealthApp.Controllers
 
         // POST: api/availabledays
         [Authorize]
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] AvailableDayDto dto)
         {
             if (dto == null)
@@ -104,7 +104,7 @@ namespace HealthApp.Controllers
 
         // PUT: api/availabledays/5
         [Authorize]
-        [HttpPut("{id:int}")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] AvailableDayDto dto)
         {
             if (dto == null)
@@ -141,7 +141,7 @@ namespace HealthApp.Controllers
 
         // DELETE: api/availabledays/5
         [Authorize]
-        [HttpDelete("{id:int}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _availableDayRepository.Delete(id);

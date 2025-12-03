@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 interface BookingCalendarProps {
     bookings: Booking[];
     apiUrl: string;
-    onBookingDeleted: (bookingId: number) => void;
+    onBookingDeleted?: (bookingId: number) => void;
 }
 
 const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, apiUrl, onBookingDeleted }) => {
@@ -19,6 +19,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, apiUrl, onB
                     <th>Date</th>
                     <th>PatientId</th>
                     <th>EmployeeId</th>
+                    <th>availabledayId</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -30,12 +31,17 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, apiUrl, onB
                         <td>{new Date(booking.date).toLocaleString()}</td>
                         <td>{booking.patientId}</td>
                         <td>{booking.employeeId}</td>
+                        <td>{booking.availableDayId}</td>
                         <td className='text-center'>
-                            <Link to={`/bookingupdate/${booking.bookingId}`}>Update</Link>
-                            <Link to="#"
-                                onClick={(event) => onBookingDeleted(booking.bookingId!)}
-                                className="btn btn-link text-danger"
-                            >Delete</Link>
+                            {onBookingDeleted && (
+                                <>
+                                    <Link to={`/bookingupdate/${booking.bookingId}`} className="me-2">Update</Link>
+                                    <Link to="#"
+                                        onClick={(event) => onBookingDeleted(booking.bookingId!)}
+                                        className="btn btn-link text-danger"
+                                    >Delete</Link>
+                                </>
+                            )}
                         </td>
                     </tr>
                 ))}

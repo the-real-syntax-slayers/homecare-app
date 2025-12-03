@@ -19,6 +19,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, apiUrl, onBooking
                     <th>Date</th>
                     <th>PatientId</th>
                     <th>EmployeeId</th>
+                    <th>availabledayId</th>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -30,6 +31,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, apiUrl, onBooking
                         <td>{new Date(booking.date).toLocaleString()}</td>
                         <td>{booking.patientId}</td>
                         <td>{booking.employeeId}</td>
+                        <td>{booking.availableDayId}</td>
                         <td className='text-center'>
                             {onBookingDeleted && (
                                 <>

@@ -22,6 +22,43 @@ interface AuthContextType { // Define the shape of the auth context
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Hjelpefunksjon: dekode token + sett rolle basert på brukernavn
+const decodeUserWithRole = (token: string): User | null => {
+    try {
+        const decodedRaw: any = jwtDecode(token);
+
+        if (!decodedRaw || typeof decodedRaw !== 'object') {
+            return null;
+        }
+
+        // bestemme rolle ut fra sub (username)
+        let role: User['role'] = 'client';
+        const username = decodedRaw.sub as string | undefined;
+
+        if (username === 'admin') {
+            role = 'admin';
+        } else if (username && username.toLowerCase().startsWith('emp')) {
+            role = 'employee';
+        }
+
+        const decodedUser: User = {
+            ...(decodedRaw as object),
+            role,
+        } as User;
+
+        // sjekk utløp
+        if (decodedUser.exp * 1000 <= Date.now()) {
+            return null;
+        }
+
+        return decodedUser;
+        
+    } catch (error) {
+        console.error('Invalid token', error);
+        return null;
+    }
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));

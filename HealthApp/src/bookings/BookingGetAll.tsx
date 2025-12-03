@@ -7,7 +7,7 @@ import * as BookingService from './BookingService';
 import { useAuth } from '../auth/AuthContext';
 const API_URL = import.meta.env.VITE_API_URL;
 
-const BookingListPage: React.FC = () => {
+const BookingGetAll: React.FC = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -94,4 +94,4 @@ const BookingListPage: React.FC = () => {
     );
 };
 
-export default BookingListPage;
+export default BookingGetAll;
