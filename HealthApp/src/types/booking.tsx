@@ -4,5 +4,5 @@ export interface Booking {
     date: string;
     patientId: number;
     employeeId: number;
-    availableDayId: number;
+    availableDayId?: number;
 }
