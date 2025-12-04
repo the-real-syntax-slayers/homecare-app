@@ -30,7 +30,11 @@ const App: React.FC = () => {
     <AuthProvider>
       <Router>
         <NavMenu />
-        <Container className="mt-4">
+        {/* Using <div> instead of <Container> to allow 
+        full-width background sections on pages.
+        Content constraints are handled within individual page components.
+        */}
+        <div className="mt-4">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -52,7 +56,7 @@ const App: React.FC = () => {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Container>
+        </div>
       </Router>
     </AuthProvider>
   )
