@@ -1,3 +1,4 @@
+/* --- Global Variables --- */
 :root {
   /* Global Font Variables */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -10,24 +11,25 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Application Color Palette */
   --primary-color: #2563eb;
   --secondary-bg: #f0f9ff;
   --text-dark: #213547;
 }
 
-/* --- 1. Universal Box Sizing Reset (The "Textbook" Fix) --- */
-/* This ensures padding/border doesn't increase an element's declared width.
-   Applying this to * is standard industry practice (e.g., Paul Irish reset). */
+
+/* --- Box Sizing Reset --- */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-/* --- 2. Base HTML/Body Reset --- */
+
+/* --- Base HTML/Body Reset & Structure --- */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  /* Fixes potential scroll issues on mobile */
+  /* Prevents horizontal scrollbar issues */
   overflow-x: hidden; 
 }
 
@@ -36,8 +38,9 @@ body {
   min-height: 100vh;
 }
 
+
 /* --- 3. Root Application Wrapper --- */
 #root {
-  width: 100%;           /*Sets full width */
-  min-height: 100vh;     /* Ensures the app is at least as tall as the screen */
+  width: 100%;
+  min-height: 100vh;
 }

@@ -1,5 +1,7 @@
 /* Bootstrap overrides and custom utilities for HomePage */
 
+
+/* --- Global Section Padding --- */
 .hero-section {
     padding-top: 5rem;
     padding-bottom: 5rem;
@@ -23,6 +25,8 @@
     color: white;
 }
 
+
+/* --- How It Works Section Styling --- */
 .process-number {
     background-color: var(--primary-color);
     color: white;
@@ -51,39 +55,43 @@
     text-align: left;
 }
 
-/* --- Card Styling --- */
+
+/* --- Services Section Card Styling --- */
 .services-section .card {
     /* Base style for all cards in this section */
-    border: 1px solid #e0e7ff; /* Subtle light blue border */
+    border: 1px solid #e0e7ff;
     border-radius: 1rem;
-    transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Lighter resting shadow */
+    transition: all 0.3s ease-in-out; /* Transition for hover effects */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .services-section .card:hover {
-    /* Lift and emphasize the card on hover */
+    /* Hover effects for cards */
     transform: translateY(-8px); /* Card lifts up slightly */
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2); /* More prominent shadow with a blue tint */
-    border-color: #93c5fd; /* Accent border color on hover */
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+    border-color: #93c5fd;
 }
 
 .services-section .card-title {
-    color: var(--primary-color); /* Use the brand's primary blue color for the title */
+    color: var(--primary-color);
     font-weight: 700;
-    margin-bottom: 0.75rem; /* Add some space below the title */
+    margin-bottom: 0.75rem;
 }
 
 .services-section .card-text {
-    color: var(--text-dark); /* Keep description text slightly subdued */
+    color: var(--text-dark);
     font-size: 1rem;
 }
 
 .services-section .card-body {
-    padding: 2rem; /* Increase padding inside the card for more breathing room */
+    padding: 2rem;
 }
 
+
+/* --- Responsive Layout Styles --- */
 @media (min-width: 768px) {
     .hero-section {
+        /* Increased padding on larger screens */
         padding-top: 8rem;
         padding-bottom: 8rem;
     }
@@ -91,6 +99,7 @@
     .services-section,
     .how-it-works-section,
     .cta-section {
+        /* Increased padding on larger screens */
         padding-top: 6rem;
         padding-bottom: 6rem;
     }
