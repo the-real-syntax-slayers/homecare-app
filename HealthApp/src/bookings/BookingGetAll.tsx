@@ -1,10 +1,12 @@
+// HealthApp/src/bookings/BookingGetAll.tsx
 import React, { useState, useEffect } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import BookingCalendar from './BookingCalendar';
 import BookingTable from './BookingTable';
 import { Booking } from '../types/booking';
 import * as BookingService from './BookingService';
 import { useAuth } from '../auth/AuthContext';
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const BookingGetAll: React.FC = () => {
@@ -12,62 +14,57 @@ const BookingGetAll: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [showTable, setShowTable] = useState<boolean>(true);
+    
+    // 1. Get the current user from your AuthContext
     const { user } = useAuth();
 
     const toggleCalendarOrTable = () => setShowTable(prevShowTable => !prevShowTable);
 
     const fetchBookings = async () => {
-        setLoading(true); // Set loading to true when starting the fetch
-        setError(null); // Clear any previous errors
+        setLoading(true);
+        setError(null);
 
         try {
-            const data = await BookingService.fetchBookings();
+            // 2. Fetch all bookings
+            let data = await BookingService.fetchBookings();
+
+            // 3. Filter based on Role and ID (Frontend Filtering)
+            if (user) {
+                if (user.role === 'Patient' && user.patientId) {
+                    data = data.filter(b => b.patientId === user.patientId);
+                } else if (user.role === 'Employee' && user.employeeId) {
+                    data = data.filter(b => b.employeeId === user.employeeId);
+                }
+                // Admin sees everything (no filter)
+            } else {
+                // Not logged in? See nothing.
+                data = [];
+            }
+
             setBookings(data);
             console.log(data);
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.error(`There was a problem with the fetch operation: ${error.message}`);
-            } else {
-                console.error('Unknown error', error);
+                console.error(`Error: ${error.message}`);
             }
             setError('Failed to fetch bookings.');
         } finally {
-            setLoading(false); // Set loading to false once the fetch is complete
+            setLoading(false);
         }
     };
 
+    // Re-fetch if the user changes (e.g. login/logout)
     useEffect(() => {
         fetchBookings();
-    }, []);
-
-    // noe vi må se på, bookings fucka seg når jeg prøvde denna.
-
-    /* useEffect(() => {
-        // Use localStorage.getItem / setItem if you want to persist the view mode
-        const savedViewMode = localStorage.getItem('bookingViewMode');
-        console.log('[fetch bookings] Saved view mode:', savedViewMode); // Debugging line
-        if (savedViewMode) {
-            if (savedViewMode === 'calendar')
-                setShowTable(false)
-            console.log('show table', showTable);
-        }
-        fetchBookings();
-    }, []);
-
-    useEffect(() => {
-        console.log('[save view state] Saving view mode:', showTable ? 'table' : 'calendar');
-        localStorage.setItem('bookingViewMode', showTable ? 'table' : 'calendar');
-    }, [showTable]);*/
+    }, [user]);
 
     const handleBookingDeleted = async (bookingId: number) => {
-        const confirmDelete = window.confirm(`Are you sure you want to delete the booking ${bookingId}?`);
+        const confirmDelete = window.confirm(`Delete booking ${bookingId}?`);
         if (confirmDelete) {
             try {
                 await BookingService.deleteBooking(bookingId);
-                setBookings(prevBookings => prevBookings.filter(booking => booking.bookingId !== bookingId));
-                console.log('Booking deleted:', bookingId);
+                setBookings(prev => prev.filter(b => b.bookingId !== bookingId));
             } catch (error) {
-                console.error('Error deleting booking:', error);
                 setError('Failed to delete booking.');
             }
         }
@@ -77,19 +74,21 @@ const BookingGetAll: React.FC = () => {
         <div>
             <h1>Bookings</h1>
             <Button onClick={fetchBookings} className="btn btn-primary mb-3 me-2" disabled={loading}>
-                {loading ? 'Loading...' : 'Refresh All Bookings'}
+                {loading ? 'Loading...' : 'Refresh'}
             </Button>
             <Button onClick={toggleCalendarOrTable} className='btn btn-primary mb-3 me-2'>
-                {showTable ? `Display Table` : `Display Calendar`}
+                {showTable ? `Display Calendar` : `Display Table`}
             </Button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
+            
+            {/* 4. Pass the FILTERED bookings to both components */}
             {showTable
-                ? <BookingCalendar bookings={bookings} apiUrl={API_URL} onBookingDeleted={handleBookingDeleted} />
-                : <BookingTable bookings={bookings} apiUrl={API_URL} onBookingDeleted={handleBookingDeleted} />}
+                ? <BookingTable bookings={bookings} apiUrl={API_URL} onBookingDeleted={handleBookingDeleted} />
+                : <BookingCalendar bookings={bookings} apiUrl={API_URL} onBookingDeleted={handleBookingDeleted} />}
+            
             {user && (
                 <Button href='/bookingcreate' className='btn btn-secondary mt-3'>Add New Booking</Button>
             )}
-
         </div>
     );
 };

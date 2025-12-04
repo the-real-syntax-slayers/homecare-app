@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+// HealthApp/src/App.tsx
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
 import HomePage from './home/HomePage'
 import BookingGetAll from './bookings/BookingGetAll'
@@ -11,8 +12,18 @@ import NavMenu from './shared/NavMenu'
 import LoginPage from './auth/LoginPage'
 import RegisterPage from './auth/RegisterPage'
 import ProtectedRoute from './auth/ProtectedRoute'
-import { AuthProvider } from './auth/AuthContext'
+import { AuthProvider, useAuth } from './auth/AuthContext'
 import './App.css'
+
+// 1. Create a simple wrapper for Employee-only routes
+const EmployeeRoute: React.FC = () => {
+    const { user } = useAuth();
+    // If not logged in or is a Patient, redirect to home
+    if (!user || user.role === 'Patient') {
+        return <Navigate to="/" replace />;
+    }
+    return <Outlet />;
+};
 
 const App: React.FC = () => {
   return (
@@ -22,18 +33,21 @@ const App: React.FC = () => {
         <Container className="mt-4">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/bookings" element={<BookingGetAll />} />
-            <Route path="/availableDays" element={<AvailableDayGetAll />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected Routes */}
+            {/* Routes accessible to ALL logged in users (Patient & Employee) */}
             <Route element={<ProtectedRoute />}>
+              <Route path="/bookings" element={<BookingGetAll />} />
               <Route path="/bookingcreate" element={<BookingCreatePage />} />
               <Route path="/bookingupdate/:bookingId" element={<BookingUpdatePage />} />
-              
-              <Route path="/availableDayscreate" element={<AvailableDayCreatePage />} />
-              <Route path="/availableDays/update/:availableDayId" element={<AvailableDayUpdatePage />} />
+            </Route>
+
+            {/* Routes accessible ONLY to Employees (and Admin) */}
+            <Route element={<EmployeeRoute />}>
+               <Route path="/availableDays" element={<AvailableDayGetAll />} />
+               <Route path="/availableDayscreate" element={<AvailableDayCreatePage />} />
+               <Route path="/availableDays/update/:availableDayId" element={<AvailableDayUpdatePage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
