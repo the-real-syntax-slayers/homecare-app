@@ -25,7 +25,7 @@ const AvailableDayGetAll: React.FC = () => {
         setError(null);
 
         try {
-            let data = await AvailableDayService.fetchAvailableDays();
+            let data: AvailableDay[] = await AvailableDayService.fetchAvailableDays();
             
             // 2. Filter for Employees
             if (user?.role === 'Employee' && user.employeeId) {

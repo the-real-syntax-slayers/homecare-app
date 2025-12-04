@@ -26,7 +26,7 @@ const BookingGetAll: React.FC = () => {
 
         try {
             // 2. Fetch all bookings
-            let data = await BookingService.fetchBookings();
+            let data: Booking[] = await BookingService.fetchBookings();
 
             // 3. Filter based on Role and ID (Frontend Filtering)
             if (user) {
