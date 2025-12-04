@@ -12,7 +12,7 @@ interface AvailableDayFormProps {
 }
 
 const AvailableDayForm: React.FC<AvailableDayFormProps> = ({ onAvailableDayChanged, availableDayId, isUpdate = false, initialData }) => {
-    const [date, setDate] = useState<string>(initialData?.date || '');
+    const [date, setDate] = useState<string>(initialData?.date ? initialData.date.slice(0, 16) : '');
     const [employeeId, setEmployeeId] = useState<number>(1);
     const [notes, setDescription] = useState<string>(initialData?.notes || '');
     const [error, setError] = useState<string | null>(null);
@@ -24,8 +24,13 @@ const AvailableDayForm: React.FC<AvailableDayFormProps> = ({ onAvailableDayChang
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        const availableDay: AvailableDay = { availableDayId, date, employeeId, notes};
-        onAvailableDayChanged(availableDay); // Call the passed function with the availableDay data
+        const availableDay: AvailableDay = { 
+            availableDayId, 
+            date: date + ':00', // Add seconds to match ISO format
+            employeeId, 
+            notes
+        };
+        onAvailableDayChanged(availableDay);
     };
 
     return (

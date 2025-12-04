@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using HealthApp.DTOs;
 using HealthApp.Models;
+using HealthApp.DAL;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace HealthApp.Controllers
 {
@@ -18,17 +21,20 @@ namespace HealthApp.Controllers
         private readonly SignInManager<AuthUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
+        private readonly BookingDbContext _bookingDbContext;
 
         public AuthController(
             UserManager<AuthUser> userManager,
             SignInManager<AuthUser> signInManager,
             IConfiguration configuration,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            BookingDbContext bookingDbContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _logger = logger;
+            _bookingDbContext = bookingDbContext;
         }
 
         [HttpPost("register")]
@@ -49,6 +55,89 @@ namespace HealthApp.Controllers
             {
                 _logger.LogWarning("[AuthController] Registration failed for {User}", dto.Username);
                 return BadRequest(result.Errors);
+            }
+
+            // Determine role based on username (same logic as frontend)
+            string usernameLower = dto.Username.ToLower();
+            bool isEmployee = usernameLower.StartsWith("emp");
+            bool isAdmin = usernameLower == "admin";
+
+            // Extract ID from username (e.g., "Adrian77" -> 77, "emp5" -> 5)
+            var match = Regex.Match(dto.Username, @"(\d+)$");
+            
+            if (match.Success && int.TryParse(match.Value, out int extractedId))
+            {
+                try
+                {
+                    if (isEmployee)
+                    {
+                        // Create or update Employee
+                        var existingEmployee = await _bookingDbContext.Employees.FindAsync(extractedId);
+                        
+                        if (existingEmployee == null)
+                        {
+                            var employee = new Employee
+                            {
+                                EmployeeId = extractedId,
+                                Name = dto.Username,
+                                Description = $"Employee created from registration: {dto.Email}"
+                            };
+                            
+                            _bookingDbContext.Employees.Add(employee);
+                            await _bookingDbContext.SaveChangesAsync();
+                            _logger.LogInformation("[AuthController] Created Employee {EmployeeId} for user {User}", extractedId, dto.Username);
+                        }
+                        else
+                        {
+                            // Employee already exists, update the name if needed
+                            if (existingEmployee.Name != dto.Username)
+                            {
+                                existingEmployee.Name = dto.Username;
+                                await _bookingDbContext.SaveChangesAsync();
+                            }
+                            _logger.LogInformation("[AuthController] Employee {EmployeeId} already exists for user {User}", extractedId, dto.Username);
+                        }
+                    }
+                    else if (!isAdmin)
+                    {
+                        // Create or update Patient (default for non-admin, non-employee usernames)
+                        var existingPatient = await _bookingDbContext.Patients.FindAsync(extractedId);
+                        
+                        if (existingPatient == null)
+                        {
+                            var patient = new Patient
+                            {
+                                PatientId = extractedId,
+                                Name = dto.Username,
+                                Description = $"Patient created from registration: {dto.Email}"
+                            };
+                            
+                            _bookingDbContext.Patients.Add(patient);
+                            await _bookingDbContext.SaveChangesAsync();
+                            _logger.LogInformation("[AuthController] Created Patient {PatientId} for user {User}", extractedId, dto.Username);
+                        }
+                        else
+                        {
+                            // Patient already exists, update the name if needed
+                            if (existingPatient.Name != dto.Username)
+                            {
+                                existingPatient.Name = dto.Username;
+                                await _bookingDbContext.SaveChangesAsync();
+                            }
+                            _logger.LogInformation("[AuthController] Patient {PatientId} already exists for user {User}", extractedId, dto.Username);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but don't fail registration
+                    _logger.LogError(ex, "[AuthController] Failed to create Patient/Employee for user {User}", dto.Username);
+                    // Continue with registration even if patient/employee creation fails
+                }
+            }
+            else
+            {
+                _logger.LogWarning("[AuthController] Could not extract ID from username {User}. Patient/Employee not created.", dto.Username);
             }
 
             _logger.LogInformation("[AuthController] User registered: {User}", dto.Username);

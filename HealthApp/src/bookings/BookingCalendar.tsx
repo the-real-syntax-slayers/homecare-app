@@ -3,11 +3,12 @@ import { Button, Spinner } from 'react-bootstrap';
 import { Booking } from '../types/booking';
 import { Link } from 'react-router-dom';
 import * as BookingService from './BookingService';
+import { useAuth } from '../auth/AuthContext';
 
 interface BookingCalendarProps {
     // We keep this to satisfy the interface from BookingGetAll, 
     // but we will fetch specific monthly data internally.
-    bookings?: Booking[]; 
+    bookings: Booking[]; 
     apiUrl: string;
     onBookingDeleted?: (bookingId: number) => void;
 }
@@ -18,6 +19,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ apiUrl, onBookingDele
     // Local state to hold bookings for the current month
     const [monthlyBookings, setMonthlyBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const { user } = useAuth(); // Get user for filtering
 
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth(); // 0-indexed (0 = Jan)
@@ -28,8 +30,23 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ apiUrl, onBookingDele
             setLoading(true);
             try {
                 // Backend expects month 1-12, JS provides 0-11
-                const data = await BookingService.fetchBookingsByMonth(currentYear, currentMonth + 1);
-                setMonthlyBookings(data);
+                const data: Booking[] = await BookingService.fetchBookingsByMonth(currentYear, currentMonth + 1);
+                
+                // Filter based on Role and ID (same logic as BookingGetAll)
+                let filteredData = data;
+                if (user) {
+                    if (user.role === 'Patient' && user.patientId) {
+                        filteredData = data.filter((b: Booking) => b.patientId === user.patientId);
+                    } else if (user.role === 'Employee' && user.employeeId) {
+                        filteredData = data.filter((b: Booking) => b.employeeId === user.employeeId);
+                    }
+                    // Admin sees everything (no filter)
+                } else {
+                    // Not logged in? See nothing.
+                    filteredData = [];
+                }
+                
+                setMonthlyBookings(filteredData);
             } catch (error) {
                 console.error("Failed to load monthly bookings", error);
             } finally {
@@ -37,7 +54,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ apiUrl, onBookingDele
             }
         };
         loadMonthData();
-    }, [currentYear, currentMonth]); // Re-run whenever year or month changes
+    }, [currentYear, currentMonth, user]); // Re-run whenever year or month changes
 
     // --- Calendar Logic ---
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -65,7 +82,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ apiUrl, onBookingDele
     const today = new Date();
 
     return (
-        <div className="container p-0">
+        <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <Button variant="outline-secondary" onClick={prevMonth}>&laquo; Previous</Button>

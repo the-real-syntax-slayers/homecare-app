@@ -11,7 +11,6 @@ interface BookingTableProps {
 }
 
 const BookingTable: React.FC<BookingTableProps> = ({ bookings, onBookingDeleted }) => {
-    // Logic removed. We simply display the 'bookings' prop which is already filtered by the parent.
     
     return (
         <Table striped bordered hover>
@@ -21,8 +20,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, onBookingDeleted 
                     <th>Description</th>
                     <th>Date</th>
                     <th>PatientId</th>
-                    <th>EmployeeId</th>
-                    <th>AvailableDayId</th>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+                    <th>EmployeeId</th>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -34,7 +32,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, onBookingDeleted 
                         <td>{new Date(booking.date).toLocaleString()}</td>
                         <td>{booking.patientId}</td>
                         <td>{booking.employeeId}</td>
-                        <td>{booking.availableDayId}</td>
                         <td className='text-center'>
                             {onBookingDeleted && (
                                 <>
