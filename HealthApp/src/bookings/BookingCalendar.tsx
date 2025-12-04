@@ -30,15 +30,15 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ apiUrl, onBookingDele
             setLoading(true);
             try {
                 // Backend expects month 1-12, JS provides 0-11
-                const data = await BookingService.fetchBookingsByMonth(currentYear, currentMonth + 1);
+                const data: Booking[] = await BookingService.fetchBookingsByMonth(currentYear, currentMonth + 1);
                 
                 // Filter based on Role and ID (same logic as BookingGetAll)
                 let filteredData = data;
                 if (user) {
                     if (user.role === 'Patient' && user.patientId) {
-                        filteredData = data.filter(b => b.patientId === user.patientId);
+                        filteredData = data.filter((b: Booking) => b.patientId === user.patientId);
                     } else if (user.role === 'Employee' && user.employeeId) {
-                        filteredData = data.filter(b => b.employeeId === user.employeeId);
+                        filteredData = data.filter((b: Booking) => b.employeeId === user.employeeId);
                     }
                     // Admin sees everything (no filter)
                 } else {
