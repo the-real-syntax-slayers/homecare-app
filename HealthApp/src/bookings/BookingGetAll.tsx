@@ -71,7 +71,7 @@ const BookingGetAll: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="container p-0">
             <h1>Bookings</h1>
             <Button onClick={fetchBookings} className="btn btn-primary mb-3 me-2" disabled={loading}>
                 {loading ? 'Loading...' : 'Refresh'}

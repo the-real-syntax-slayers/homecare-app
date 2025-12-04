@@ -1,7 +1,6 @@
 // HealthApp/src/availableDays/AvailableDayGetAll.tsx
 import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
-import AvailableDayCalendar from './AvailableDayCalendar';
 import AvailableDayTable from './AvailableDayTable';
 import { AvailableDay } from '../types/availableDay';
 import * as AvailableDayService from './AvailableDayService';
@@ -13,12 +12,9 @@ const AvailableDayGetAll: React.FC = () => {
     const [availableDays, setAvailableDays] = useState<AvailableDay[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [showTable, setShowTable] = useState<boolean>(true);
     
     // 1. Get User
     const { user } = useAuth();
-
-    const toggleCalendarOrTable = () => setShowTable(prevShowTable => !prevShowTable);
 
     const fetchAvailableDays = async () => {
         setLoading(true);
@@ -61,19 +57,14 @@ const AvailableDayGetAll: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="container p-0">
             <h1>AvailableDays</h1>
             <Button onClick={fetchAvailableDays} className="btn btn-primary mb-3 me-2" disabled={loading}>
                 {loading ? 'Loading...' : 'Refresh'}
             </Button>
-            <Button onClick={toggleCalendarOrTable} className='btn btn-primary mb-3 me-2'>
-                {showTable ? `Display Calendar` : `Display Table`}
-            </Button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             
-            {showTable
-                ? <AvailableDayTable availableDays={availableDays} apiUrl={API_URL} onAvailableDayDeleted={handleAvailableDayDeleted} />
-                : <AvailableDayCalendar availableDays={availableDays} apiUrl={API_URL} onAvailableDayDeleted={handleAvailableDayDeleted} />}
+            <AvailableDayTable availableDays={availableDays} apiUrl={API_URL} onAvailableDayDeleted={handleAvailableDayDeleted} />
             
             {user && (
                 <Button href='/availableDayscreate' className='btn btn-secondary mt-3'>Add New AvailableDay</Button>

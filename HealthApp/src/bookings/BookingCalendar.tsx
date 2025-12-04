@@ -82,7 +82,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ apiUrl, onBookingDele
     const today = new Date();
 
     return (
-        <div className="container p-0">
+        <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <Button variant="outline-secondary" onClick={prevMonth}>&laquo; Previous</Button>
