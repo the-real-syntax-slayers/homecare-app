@@ -69,16 +69,24 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingChanged, bookingId, 
 
         // Enkel POC-logikk: hvis vi ikke kan lese et heltall fra tokenet,
         // bruker vi PatientId = 1
-        const parsedPatientId = Number(user.nameid);
-        const fallbackPatientId = Number.isNaN(parsedPatientId) ? 1 : parsedPatientId;
+
+        // For updates, keep the existing patientId; for new bookings, use the logged-in patient
+        const patientId = isUpdate && initialData?.patientId 
+            ? initialData.patientId 
+            : user.patientId;
+
+        if (!patientId) {
+            alert('You must be logged in as a patient to create a booking');
+            return;
+        }
 
         const booking: Booking = {
             bookingId: initialData?.bookingId,
             description,
-            availableDayId: selected.availableDayId!,                 // FK til AvailableDay
-            employeeId: selected.employeeId,                          // hentes fra AvailableDay
-            date: new Date(selected.date).toISOString(),              // trygg ISO-string
-            patientId: fallbackPatientId                              // POC: én "standard" pasient
+            availableDayId: selected.availableDayId!,
+            employeeId: selected.employeeId,
+            date: new Date(selected.date).toISOString(),
+            patientId: patientId
         };
 
         await onBookingChanged(booking);

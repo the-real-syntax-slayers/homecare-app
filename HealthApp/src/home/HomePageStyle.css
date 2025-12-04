@@ -1,0 +1,97 @@
+/* Bootstrap overrides and custom utilities for HomePage */
+
+.hero-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.services-section {
+    background-color: var(--secondary-bg);
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.how-it-works-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.cta-section {
+    background-color: var(--primary-color);
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+    color: white;
+}
+
+.process-number {
+    background-color: var(--primary-color);
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.process-step {
+    display: flex;
+    align-items: flex-start;
+
+    max-width: 450px; 
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.process-content {
+    margin-left: 1.5rem;
+    text-align: left;
+}
+
+/* --- Card Styling --- */
+.services-section .card {
+    /* Base style for all cards in this section */
+    border: 1px solid #e0e7ff; /* Subtle light blue border */
+    border-radius: 1rem;
+    transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Lighter resting shadow */
+}
+
+.services-section .card:hover {
+    /* Lift and emphasize the card on hover */
+    transform: translateY(-8px); /* Card lifts up slightly */
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2); /* More prominent shadow with a blue tint */
+    border-color: #93c5fd; /* Accent border color on hover */
+}
+
+.services-section .card-title {
+    color: var(--primary-color); /* Use the brand's primary blue color for the title */
+    font-weight: 700;
+    margin-bottom: 0.75rem; /* Add some space below the title */
+}
+
+.services-section .card-text {
+    color: var(--text-dark); /* Keep description text slightly subdued */
+    font-size: 1rem;
+}
+
+.services-section .card-body {
+    padding: 2rem; /* Increase padding inside the card for more breathing room */
+}
+
+@media (min-width: 768px) {
+    .hero-section {
+        padding-top: 8rem;
+        padding-bottom: 8rem;
+    }
+
+    .services-section,
+    .how-it-works-section,
+    .cta-section {
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+    }
+}
